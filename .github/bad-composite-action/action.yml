@@ -1,0 +1,16 @@
+name: "Failed Custom Composite Action"
+description: "This action tries to access secrets in the caller workflow. It's not going to work."
+
+runs:
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runsusing-for-composite-actions
+  using: "composite" # Required You must set this value to 'composite'
+  steps:
+    # This step throws error. It tries to access secrets in the caller workflow. It's not going to work.
+    - name: "Failed to access secret"
+      run: echo "Try to access SECRET0:${{secrets.SECRET0}}"
+      shell: bash
+
+    # Also not working for GITHUB_TOKEN
+    - name: "Try to access GITHUB_TOKEN"
+      run: echo "${{secrets.GITHUB_TOKEN}}"
+      shell: bash

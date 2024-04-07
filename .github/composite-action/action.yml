@@ -1,0 +1,57 @@
+name: "Custom Composite Action"
+description: "The filename must be action.yml"
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+inputs:
+  input1:
+    description: "The first input to composite action"
+    required: true
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
+outputs:
+  composite-action-out1:
+    description: "The first output from composite action"
+    value: ${{steps.step-singleline.outputs.output1}}
+  composite-action-out2:
+    description: "The second output from reuse-workflow"
+    value: ${{steps.step-multiline.outputs.output2}}
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
+runs:
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runsusing-for-composite-actions
+  using: "composite" # Required You must set this value to 'composite'
+  steps:
+    - name: "Print input"
+      run: echo "input1 is:${{inputs.input1}}"
+      shell: bash
+
+    # - name: "Try to access secret"
+    #   run: echo "Try to access SECRET0:${{secrets.SECRET0}}"
+    #   shell: bash
+
+    # - name: "Try to access GITHUB_TOKEN"
+    #   run: echo "${{secrets.GITHUB_TOKEN}}"
+    #   shell: bash
+
+    - name: "Try to access env variable in the caller workflow"
+      run: echo "Try to access env vars in the caller workdlow:${{env.CALLER_ENV}}"
+      shell: bash
+
+    - name: "Try to access env variable assigned to this action"
+      run: echo "Try to access env vars in the assigned to this action:${{env.ASSIGNED_ENV}}"
+      shell: bash
+
+    - name: "assign single-line output"
+      id: step-singleline
+      run: echo "output1=single-line-outpu1-from-composite-action" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: "Dump multi-line output"
+      id: step-multiline
+      shell: bash
+      run: |
+        {
+          echo 'output2<<EOF'
+          curl https://example.com
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
