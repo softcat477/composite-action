@@ -1,0 +1,31 @@
+name: "Bad composite actions trying to access secrets in the caller workflow"
+
+on: 
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  CALLER_ENV: "---"
+
+jobs:
+  use-failed-composite-action:
+    name: Use Composite Action in the same Repo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: First step is just a warm greeting
+        run: echo "Hi"
+
+      - name: Access secrets in the caller workflow
+        run: echo "SECRET0 is:${{secrets.SECRET0}}"
+
+      # This step throws error. It tries to access secrets in the caller workflow. It's not going to work.
+      - name: Use composite action
+        id: composite-action
+        uses: ./.github/bad-composite-action
+        env:
+          ASSIGNED_ENV: "---"
+        with:
+          input1: "An input assigned to composite actions"
